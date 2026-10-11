@@ -51,14 +51,6 @@ conda activate ctr
 pip install -e .
 ```
 
-## 数据准备
-
-从 Kaggle 下载 Avazu CTR 数据集后，放置到 data/raw/ 目录：
-
-```text
-https://www.kaggle.com/c/avazu-ctr-prediction/data
-```
-
 ## 运行流程
 
 第一阶段：数据工程。
