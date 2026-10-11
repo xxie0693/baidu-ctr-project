@@ -1,0 +1,36 @@
+# 数据目录（保留目录结构，忽略数据文件）
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# reports 例外：体积小，纳入版本控制
+!data/reports/
+!data/reports/*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+
+# 工具缓存
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/
+
+# 日志
+*.log
+logs/
+
+# OS
+.DS_Store

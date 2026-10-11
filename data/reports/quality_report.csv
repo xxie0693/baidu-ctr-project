@@ -1,0 +1,6 @@
+check,passed,detail
+schema_consistency,True,字段完整
+completeness,True,"id 缺失=0, click 缺失=0, hour 缺失=0"
+uniqueness,True,"id 唯一值=40428967, 总行数=40428967"
+validity,True,取值有效
+correctness,True,click 仅含 0/1
