@@ -381,14 +381,14 @@ $$ y_{FM} = \\sum_{i=1}^{n} \\sum_{j=i+1}^{n} \\langle v_i, v_j \\rangle x_i x_j
 
 ---
 
-<!-- ## 八、参考资料
+## 八、参考资料
 
-### 原论文
+| 论文 | 发表 | arXiv / 官方链接 |
+|------|------|-----------------|
+| Wide & Deep | 2016 DLRS | https://arxiv.org/abs/1606.07792 |
+| DIN | 2018 KDD | https://arxiv.org/abs/1706.06978 |
+| FFM | 2016 RecSys | https://www.csie.ntu.edu.tw/~cjlin/papers/ffm.pdf |
+| DeepFM | 2017 IJCAI | https://arxiv.org/abs/1703.04247 |
 
-1. Cheng, H. T., et al. (2016). **Wide & Deep Learning for Recommender Systems**. DLRS.
-2. Zhou, G., et al. (2018). **Deep Interest Network for Click-Through Rate Prediction**. KDD.
-3. Juan, Y., et al. (2016). **Field-aware Factorization Machines for CTR Prediction**. RecSys.
-4. Guo, H., et al. (2017). **DeepFM: A Factorization-Machine based Neural Network for CTR Prediction**. IJCAI.
-
---- -->
+---
 
