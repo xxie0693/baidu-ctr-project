@@ -82,13 +82,16 @@ python -m ctr_project.models.train
 
 数据建模架构
 
-星型模型设计
+### 星型模型设计
+
+```mermaid
 graph TD
     F[fact_impression 事实表<br/>4000万行]
     D1[dim_ad_position 广告位维度] --> F
     D2[dim_media 媒体维度] --> F
     D3[dim_device 设备维度] --> F
     D4[dim_time 时间维度] --> F
+```
 
 特征工程与异常处理
 
