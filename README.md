@@ -83,16 +83,13 @@ python -m ctr_project.models.train
 数据建模架构
 
 星型模型设计
+graph TD
+    F[fact_impression 事实表<br/>4000万行]
+    D1[dim_ad_position 广告位维度] --> F
+    D2[dim_media 媒体维度] --> F
+    D3[dim_device 设备维度] --> F
+    D4[dim_time 时间维度] --> F
 
-text
-                ┌──────────────────┐
-                │  fact_impression │  事实表 (4000万行)
-                └────────┬─────────┘
-                         │
-        ┌────────────────┼────────────────┬────────────────┐
-        │                │                │                │
-   dim_ad_position   dim_media       dim_device       dim_time
-    广告位维度        媒体维度         设备维度         时间维度
 特征工程与异常处理
 
 第一阶段（原始数据）：业务规则过滤（click 值、时间有效性）。
