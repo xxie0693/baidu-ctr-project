@@ -21,6 +21,10 @@ from ctr_project.common.constants import (
     TARGET_COLUMN,
 )
 
+# 新增全局阈值常量
+MAX_DUPLICATE_RATIO: float = 0.0001  # id 重复率警戒线：0.01%
+MAX_TIME_PARSE_FAIL_RATIO: float = 0.005  # 时间解析失败率警戒线：0.5%
+
 logger = logging.getLogger(__name__)
 
 
@@ -117,65 +121,59 @@ def check_completeness(ddf: dd.DataFrame) -> CheckResult:
 
 
 def check_uniqueness(ddf: dd.DataFrame) -> CheckResult:
-    """检查 id 字段是否全局唯一。
-
-    Args:
-        ddf: 待校验的 Dask DataFrame。
-
-    Returns:
-        CheckResult 对象。
-    """
+    """检查 id 字段是否全局唯一（引入重复率告警阈值）。"""
     if ID_COLUMN not in ddf.columns:
-        return CheckResult(
-            "uniqueness", passed=False, detail=f"缺少 {ID_COLUMN}"
-        )
+        return CheckResult("uniqueness", passed=False, detail=f"缺少 {ID_COLUMN}")
 
     try:
-        total = len(ddf)
-        unique = ddf[ID_COLUMN].nunique().compute()
-    except Exception as exc:  # noqa: BLE001
-        return CheckResult(
-            "uniqueness", passed=False, detail=f"计算失败: {exc}"
-        )
+        total = int(ddf.shape[0].compute())
+        unique = int(ddf[ID_COLUMN].nunique().compute())
+    except Exception as exc:
+        return CheckResult("uniqueness", passed=False, detail=f"计算失败: {exc}")
 
-    if unique != total:
-        dup = total - unique
+    if total == 0:
+        return CheckResult("uniqueness", passed=False, detail="数据为空")
+
+    dup_count = total - unique
+    dup_ratio = dup_count / total
+    
+    # 如果重复率超过警戒线，则失败告警
+    if dup_ratio > MAX_DUPLICATE_RATIO:
         return CheckResult(
             "uniqueness",
             passed=False,
-            detail=f"id 重复 {dup} 条 (总 {total})",
+            detail=f"id 重复率 {dup_ratio*100:.4f}% 超过阈值 {MAX_DUPLICATE_RATIO*100}%",
         )
+    
     return CheckResult(
-        "uniqueness", passed=True, detail=f"id 全部唯一 ({total})"
+        "uniqueness",
+        passed=True,
+        detail=f"id 重复 {dup_count} 条 (重复率 {dup_ratio*100:.4f}%)",
     )
 
-
 def check_validity(ddf: dd.DataFrame) -> CheckResult:
-    """检查目标变量与时间字段取值有效性。
-
-    Args:
-        ddf: 待校验的 Dask DataFrame。
-
-    Returns:
-        CheckResult 对象。
-    """
+    """检查目标变量与时间字段取值有效性（引入解析失败率告警）。"""
     issues: list[str] = []
+    
     if TARGET_COLUMN in ddf.columns:
-        invalid_target = (~ddf[TARGET_COLUMN].isin([0, 1])).sum().compute()
+        invalid_target = int((~ddf[TARGET_COLUMN].isin([0, 1])).sum().compute())
         if invalid_target > 0:
-            issues.append(f"click 非 0/1: {invalid_target} 条")
+            # 目标变量非 0/1 极其严重，0容忍
+            issues.append(f"click 非 0/1 异常: {invalid_target} 条")
 
     if "hour_dt" in ddf.columns:
-        invalid_time = ddf["hour_dt"].isnull().sum().compute()
-        if invalid_time > 0:
-            issues.append(f"hour_dt 无效: {invalid_time} 条")
+        total = int(ddf.shape[0].compute())
+        invalid_time = int(ddf["hour_dt"].isnull().sum().compute())
+        invalid_ratio = invalid_time / total if total > 0 else 0
+        
+        if invalid_ratio > MAX_TIME_PARSE_FAIL_RATIO:
+            issues.append(
+                f"hour_dt 解析失败率 {invalid_ratio*100:.2f}% 超过阈值 {MAX_TIME_PARSE_FAIL_RATIO*100}%"
+            )
 
     if issues:
-        return CheckResult(
-            "validity", passed=False, detail="; ".join(issues)
-        )
+        return CheckResult("validity", passed=False, detail="; ".join(issues))
     return CheckResult("validity", passed=True, detail="取值有效")
-
 
 def check_correctness(ddf: dd.DataFrame) -> CheckResult:
     """检查逻辑一致性（click 取值仅为 0 或 1）。

@@ -210,7 +210,58 @@ def save_cleaned(ddf: dd.DataFrame, out_dir: str | Path) -> None:
     ddf.to_parquet(str(out_path), engine="pyarrow", write_index=False)
     logger.info("清洗结果已保存: %s (行数=%d)", out_path, row_count)
 
+def handle_outliers_iqr(ddf: dd.DataFrame, col: str) -> dd.DataFrame:
+    """使用 IQR 法则处理连续型聚合指标的异常值。
 
+    注意：本函数在第一阶段暂不调用，因为原始字段多为类别特征。
+    将在第二阶段针对聚合出的连续指标（如曝光量、CTR）进行处理。
+
+    Args:
+        ddf: 包含待处理列的 Dask DataFrame。
+        col: 需要做异常值平滑或剔除的列名。
+
+    Returns:
+        处理后的 Dask DataFrame。
+
+    TODO: 第二阶段落地，对聚合特征实现 IQR 和 3-sigma 过滤。
+    """
+    # 预计算分位数
+    q1 = ddf[col].quantile(0.25).compute()
+    q3 = ddf[col].quantile(0.75).compute()
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+    
+    # 利用 clip 截断极端异常值
+    ddf[col] = ddf[col].clip(lower_bound, upper_bound)
+    logger.info(f"列 {col} IQR 异常值截断完成: [{lower_bound:.2f}, {upper_bound:.2f}]")
+    return ddf
+
+
+def save_cleaned(ddf: dd.DataFrame, out_dir: str | Path) -> None:
+    """将清洗结果保存为 Parquet 格式。
+    
+    Args:
+        ddf: 清洗后的 Dask DataFrame。
+        out_dir: 输出目录。
+    """
+    row_count = int(ddf.shape[0].compute())
+    logger.info("准备写入 Parquet, 行数=%d", row_count)
+    if row_count == 0:
+        raise DataCleanError("清洗后数据为空，请检查上游过滤条件")
+
+    # 规避 Dask category 跨分区编码不一致
+    # 尝试使用 dask.dataframe.categorize 统一全局字典，避免转 string
+    cat_cols = [c for c in ddf.columns if str(ddf[c].dtype) == "category"]
+    if cat_cols:
+        ddf = ddf.astype({col: "string" for col in cat_cols})
+        logger.info("写盘前 category -> string: %s", cat_cols)
+
+    out_path = Path(out_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+    ddf.to_parquet(str(out_path), engine="pyarrow", write_index=False)
+    logger.info("清洗结果已保存: %s (行数=%d)", out_path, row_count)
+    
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
