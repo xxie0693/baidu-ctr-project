@@ -80,6 +80,24 @@ python -m ctr_project.features.build_features
 python -m ctr_project.models.train
 ```
 
+数据建模架构
+
+星型模型设计
+
+text
+                ┌──────────────────┐
+                │  fact_impression │  事实表 (4000万行)
+                └────────┬─────────┘
+                         │
+        ┌────────────────┼────────────────┬────────────────┐
+        │                │                │                │
+   dim_ad_position   dim_media       dim_device       dim_time
+    广告位维度        媒体维度         设备维度         时间维度
+特征工程与异常处理
+
+第一阶段（原始数据）：业务规则过滤（click 值、时间有效性）。
+第二阶段（聚合特征）：对聚合出的连续指标（如 CTR、曝光量）使用 IQR / 3σ 法则进行异常值截断，防止长尾噪声干扰模型。
+
 ## 数据字段说明
 
 | 字段名 | 类型 | 说明 |
