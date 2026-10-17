@@ -61,9 +61,16 @@ python -m ctr_project.data.clean_data
 python -m ctr_project.data.validate_quality
 ```
 
-第二阶段：特征工程（待实现）。
+第二阶段：SQLite 建库与特征工程。
 
 ```bash
+# 1. 构建星型模型并导入 SQLite 数据库
+python -m ctr_project.data.sqlite_loader
+
+# 2. 执行基础 SQL 分析（终端输出表格）
+python -m ctr_project.data.sqlite_queries
+
+# 3. 聚合维度特征并执行 IQR 异常值处理
 python -m ctr_project.features.build_features
 ```
 
