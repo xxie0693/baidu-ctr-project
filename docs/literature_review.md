@@ -1,11 +1,4 @@
-## 一、文件写入命令
-
-cd ~/Downloads/baidu-ctr-projrct
-
-mkdir -p docs
-
-python << 'PY_EOF'
-content = '''# 领域文献调研笔记
+# 领域文献调研笔记
 
 > 项目：百度广告点击率预测与投放优化分析
 > 阶段：第一阶段 — 领域文献调研与技术栈储备

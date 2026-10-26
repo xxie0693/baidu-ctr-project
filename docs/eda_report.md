@@ -1,7 +1,4 @@
-cd ~/Downloads/baidu-ctr-projrct
-
-python << 'PY_EOF'
-content = """# 探索性数据分析 (EDA) 报告
+# 探索性数据分析 (EDA) 报告
 
 > 项目：百度广告点击率预测与投放优化分析
 > 阶段：第二阶段 — 多维度探索性分析

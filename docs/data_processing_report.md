@@ -1,7 +1,4 @@
-cd ~/Downloads/baidu-ctr-projrct
-
-python << 'PY_EOF'
-content = '''# 数据处理报告
+# 数据处理报告
 
 > 项目：百度广告点击率预测与投放优化分析
 > 阶段：第一阶段 — 数据工程体系搭建
